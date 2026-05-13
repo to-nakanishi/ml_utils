@@ -12,7 +12,7 @@ pip install -e .
 ```
 
 ## Structure
-
+```
 ml_utils/
 ├── feature_engineering/   # 特徴量エンジニアリング
 │   ├── memory.py          # メモリ最適化(ダウンキャスト)
@@ -22,7 +22,7 @@ ml_utils/
 │   └── flags.py           # 境界値・ラウンド値フラグ
 ├── validation/            # CV戦略
 └── modeling/              # モデル学習ラッパー
-
+```
 ## Modules
 
 ### `feature_engineering.memory`
