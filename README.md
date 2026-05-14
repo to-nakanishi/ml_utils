@@ -27,7 +27,7 @@ ml_utils/
 
 ### `feature_engineering.memory`
 
-DataFrameのメモリ使用量を削減するダウンキャスト関数。(未実装)
+DataFrameのメモリ使用量を削減するダウンキャスト関数。
 
 | Function | Description |
 |----------|-------------|
