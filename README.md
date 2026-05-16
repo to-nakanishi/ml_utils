@@ -39,17 +39,17 @@ DataFrameのメモリ使用量を削減するダウンキャスト関数。
 
 ### Setup
 
-'''bash
+```bash
 git clone https://github.com/to-nakanishi/ml_utils.git
 cd ml_utils
 pip install -e ".[dev]"
-'''
+```
 
 ### Run tests
 
-'''bash
+```bash
 pytest tests/ -v
-'''
+```
 
 
 ## Requirements
