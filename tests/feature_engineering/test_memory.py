@@ -1,10 +1,6 @@
 """downcast_numeric のテスト."""
-import io
-import sys
-
 import numpy as np
 import pandas as pd
-import pytest
 
 from ml_utils.feature_engineering.memory import downcast_numeric
 
