@@ -17,10 +17,10 @@ dependencies = [
     "numpy>=1.24",
 ]
 
-[project.optional-dependencies]      
-dev = [                               
-"pytest>=7.0",                    
-] 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
