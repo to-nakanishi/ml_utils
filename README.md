@@ -35,6 +35,17 @@ DataFrameのメモリ使用量を削減するダウンキャスト関数。
 
 (以下、関数を追加するたびに更新)
 
+## Development
+
+### Setup
+
+```bash
+git clone https://github.com/to-nakanishi/ml_utils.git
+cd ml_utils
+pip install -e ".[dev]"
+```
+
+
 ## Requirements
 
 - Python >= 3.10
