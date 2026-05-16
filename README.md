@@ -47,7 +47,7 @@ pip install -e ".[dev]"
 
 ### Run tests
 
-``bash
+```bash
 pytest tests/ -v
 ```
 
