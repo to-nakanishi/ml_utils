@@ -12,16 +12,37 @@ pip install -e .
 ```
 
 ## Structure
+
+### Current
+
 ```
 ml_utils/
-├── feature_engineering/   # 特徴量エンジニアリング
-│   ├── memory.py          # メモリ最適化(ダウンキャスト)
-│   ├── target_encoding.py # OOF + Smoothing Target Encoding
-│   ├── composite.py       # 複数列の合成特徴量
-│   ├── imputation.py      # 欠損補完
-│   └── flags.py           # 境界値・ラウンド値フラグ
-├── validation/            # CV戦略
-└── modeling/              # モデル学習ラッパー
+├── ml_utils/                  # パッケージ本体
+│   └── feature_engineering/
+│       └── memory.py          # メモリ最適化(ダウンキャスト)
+├── tests/                     # pytest テストコード
+│   └── feature_engineering/
+│       └── test_memory.py
+├── pyproject.toml
+├── README.md
+└── LICENSE
+```
+
+### Planned
+
+```
+ml_utils/
+├── ml_utils/
+│   ├── feature_engineering/
+│   │   ├── memory.py          # 実装済み
+│   │   ├── target_encoding.py # OOF + Smoothing Target Encoding
+│   │   ├── composite.py       # 複数列の合成特徴量
+│   │   ├── imputation.py      # 欠損補完
+│   │   └── flags.py           # 境界値・ラウンド値フラグ
+│   ├── validation/            # CV戦略
+│   └── modeling/              # モデル学習ラッパー
+└── tests/
+    └── (各モジュールに対応するテスト)
 ```
 ## Modules
 
