@@ -17,10 +17,12 @@ def target_encode_oof(
     verbose: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     
-    """Out-of-fold target encoding with smoothing.
+    """
     ----------
     summary
     ----------
+    ターゲットエンコーディング及びリーク防止(OOF＋Smoothing)
+    を行う関数。
     train に対しては cross-validation の各 fold で
     validation 部分を除いた残りから計算した値を埋め込むことで
     target からのリークを防ぐ。test に対しては train 全体から
