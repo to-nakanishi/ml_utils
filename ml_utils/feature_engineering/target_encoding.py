@@ -16,13 +16,17 @@ def target_encode_oof(
     smoothing: float = 10.0,
     verbose: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    
     """Out-of-fold target encoding with smoothing.
-
+    ----------
+    summary
+    ----------
     train に対しては cross-validation の各 fold で
     validation 部分を除いた残りから計算した値を埋め込むことで
     target からのリークを防ぐ。test に対しては train 全体から
     計算した値を使う。未知カテゴリは global mean で補完される。
-
+    
+    ----------
     Parameters
     ----------
     train : pd.DataFrame
@@ -40,18 +44,21 @@ def target_encode_oof(
         スムージング係数。大きいほど global mean に寄る。
     verbose : bool, default=True
         True の場合、エンコード完了時にメッセージを表示。
-
+        
+    ----------
     Returns
-    -------
+    ----------
     tuple[pd.DataFrame, pd.DataFrame]
         エンコード列 `{col}_TARGET_RATE` (float32) を追加した
         (train_encoded, test_encoded)。入力 DataFrame は変更されない。
 
+    ----------
     Examples
-    --------
+    ----------
     >>> train_enc, test_enc = target_encode_oof(train, test, 'ORGANIZATION_TYPE')
     Encoded: ORGANIZATION_TYPE_TARGET_RATE
     """
+    
     if col not in train.columns:
         raise KeyError(f"Column '{col}' not found in train.")
     if col not in test.columns:
