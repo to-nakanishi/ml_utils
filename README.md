@@ -14,15 +14,16 @@ pip install -e .
 ## Structure
 
 ### Current
-
 ```
 ml_utils/
-├── ml_utils/                  # パッケージ本体
+├── ml_utils/                 　 # パッケージ本体
 │   └── feature_engineering/
-│       └── memory.py          # メモリ最適化(ダウンキャスト)
-├── tests/                     # pytest テストコード
+│       ├── memory.py          　# メモリ最適化(ダウンキャスト)
+│       └── target_encoding.py 　# OOF + Smoothing Target Encoding
+├── tests/                     　# pytest テストコード
 │   └── feature_engineering/
-│       └── test_memory.py
+│       ├── test_memory.py
+│       └── test_target_encoding.py
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
@@ -35,14 +36,14 @@ ml_utils/
 ├── ml_utils/
 │   ├── feature_engineering/
 │   │   ├── memory.py          # 実装済み
-│   │   ├── target_encoding.py # OOF + Smoothing Target Encoding
+│   │   ├── target_encoding.py # 実装済み
 │   │   ├── composite.py       # 複数列の合成特徴量
 │   │   ├── imputation.py      # 欠損補完
 │   │   └── flags.py           # 境界値・ラウンド値フラグ
 │   ├── validation/            # CV戦略
 │   └── modeling/              # モデル学習ラッパー
 └── tests/
-    └── (各モジュールに対応するテスト)
+└── (各モジュールに対応するテスト)
 ```
 ## Modules
 
@@ -53,6 +54,14 @@ DataFrameのメモリ使用量を削減するダウンキャスト関数。
 | Function | Description |
 |----------|-------------|
 | `downcast_numeric` | 数値列をfloat32 / int8〜int32に最適化 |
+
+### `feature_engineering.target_encoding`
+
+リーク防止と過学習抑制を組み込んだターゲットエンコーディング。
+
+| Function | Description |
+|----------|-------------|
+| `target_encode_oof` | OOF + Smoothing でリーク防止しつつカテゴリを target 率にエンコード |
 
 (以下、関数を追加するたびに更新)
 
