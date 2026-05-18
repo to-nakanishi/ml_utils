@@ -83,3 +83,41 @@ def test_error_on_missing_column():
     test = pd.DataFrame({'CAT': ['A', 'B']})
     with pytest.raises(KeyError):
         target_encode_oof(train, test, 'NOT_EXIST', verbose=False)
+
+
+# ===== テスト(OOF/smoothing 効果検証) =====
+def test_oof_prevents_leakage():
+    """OOF により、エンコード値はカテゴリ別 target 率と完全一致しない(リーク防止が機能)."""
+    # カテゴリ A は target が全て 1、B は全て 0 という極端なデータ
+    train = pd.DataFrame({
+        'CAT': ['A'] * 50 + ['B'] * 50,
+        'TARGET': [1] * 50 + [0] * 50,
+    })
+    test = pd.DataFrame({'CAT': ['A', 'B']})
+    train_enc, _ = target_encode_oof(train, test, 'CAT', verbose=False)
+    # リークしていれば A のエンコード値は 1.0、B は 0.0 で完全一致するはず
+    # OOF が機能していれば smoothing と fold 分割の影響でズレる
+    a_values = train_enc.loc[train['CAT'] == 'A', 'CAT_TARGET_RATE'].values
+    b_values = train_enc.loc[train['CAT'] == 'B', 'CAT_TARGET_RATE'].values
+    # A の値が 1.0 から離れていることを確認(リークしていれば 1.0 ピッタリになる)
+    assert not np.allclose(a_values, 1.0)
+    # B の値が 0.0 から離れていることを確認
+    assert not np.allclose(b_values, 0.0)
+
+
+def test_smoothing_pulls_toward_global_mean():
+    """smoothing が大きいほど、エンコード値が global_mean に近づく."""
+    train = pd.DataFrame({
+        'CAT': ['A'] * 50 + ['B'] * 50,
+        'TARGET': [1] * 50 + [0] * 50,
+    })
+    test = pd.DataFrame({'CAT': ['A', 'B']})
+    global_mean = train['TARGET'].mean()  # 0.5
+    # smoothing 小: カテゴリ平均に近い値
+    _, test_enc_small = target_encode_oof(train, test, 'CAT', smoothing=0.1, verbose=False)
+    # smoothing 大: global_mean に近い値
+    _, test_enc_large = target_encode_oof(train, test, 'CAT', smoothing=1000.0, verbose=False)
+    # global_mean からの距離を比較
+    dist_small = np.abs(test_enc_small['CAT_TARGET_RATE'].values - global_mean).mean()
+    dist_large = np.abs(test_enc_large['CAT_TARGET_RATE'].values - global_mean).mean()
+    assert dist_large < dist_small
