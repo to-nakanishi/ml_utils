@@ -57,11 +57,12 @@ DataFrameのメモリ使用量を削減するダウンキャスト関数。
 
 ### `feature_engineering.target_encoding`
 
-リーク防止と過学習抑制を組み込んだターゲットエンコーディング。
+リーク防止と過学習抑制を組み込んだターゲットエンコーディングと、その品質診断。
 
 | Function | Description |
 |----------|-------------|
 | `target_encode_oof` | OOF + Smoothing でリーク防止しつつカテゴリを target 率にエンコード |
+| `diagnose_target_encoding` | エンコード結果の品質を診断(小グループ数、リーク疑い、test カバレッジ等を dict で返す) |
 
 (以下、関数を追加するたびに更新)
 
