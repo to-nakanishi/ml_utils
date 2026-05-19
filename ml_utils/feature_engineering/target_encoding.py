@@ -105,3 +105,103 @@ def target_encode_oof(
         print(f'Encoded: {new_col}')
 
     return train_res, test_res
+
+
+def diagnose_target_encoding(
+    train: pd.DataFrame,
+    test: pd.DataFrame,
+    original_col: str,
+    encoded_col: str,
+    target: str = 'TARGET',
+    small_group_threshold: int = 10,
+) -> dict:
+    """
+    ----------
+    summary
+    ----------
+    target encoding の品質を診断する関数。
+    エンコード済みの DataFrame に対し、リーク防止が機能しているか・
+    過学習リスクがないかを示す指標を dict で返す。
+    target_encode_oof と独立して動作し、再計算は行わない。
+
+    ----------
+    Parameters
+    ----------
+    train : pd.DataFrame
+        エンコード済みの学習用データ。`original_col`, `encoded_col`, `target` を含む。
+    test : pd.DataFrame
+        エンコード済みのテスト用データ。`original_col`, `encoded_col` を含む。
+    original_col : str
+        エンコード対象だったカテゴリ列名(例: 'ORGANIZATION_TYPE')。
+    encoded_col : str
+        エンコード後の列名(例: 'ORGANIZATION_TYPE_TARGET_RATE')。
+    target : str, default='TARGET'
+        目的変数の列名。
+    small_group_threshold : int, default=10
+        小グループ判定の閾値。サンプル数がこの値未満のグループを過学習リスク
+        ありとカウントする。
+
+    ----------
+    Returns
+    ----------
+    dict
+        以下のキーを持つ診断レポート:
+        - encoded_col (str): エンコード列名
+        - groups (int): train 中のユニークカテゴリ数
+        - small_groups (int): small_group_threshold 未満のグループ数
+        - small_group_threshold (int): 入力された閾値
+        - oof_mean (float): train のエンコード値の平均
+        - global_mean (float): train の target の平均
+        - test_unknown_count (int): test で train に存在しないカテゴリの行数
+        - test_total (int): test の総行数
+        - test_coverage (float): 1 - test_unknown_count / test_total
+
+    ----------
+    Examples
+    ----------
+    >>> train_enc, test_enc = target_encode_oof(train, test, 'ORGANIZATION_TYPE')
+    >>> report = diagnose_target_encoding(
+    ...     train_enc, test_enc,
+    ...     'ORGANIZATION_TYPE', 'ORGANIZATION_TYPE_TARGET_RATE'
+    ... )
+    >>> print(report)
+    {'encoded_col': 'ORGANIZATION_TYPE_TARGET_RATE', 'groups': 58, ...}
+    """
+    if original_col not in train.columns:
+        raise KeyError(f"Column '{original_col}' not found in train.")
+    if encoded_col not in train.columns:
+        raise KeyError(f"Column '{encoded_col}' not found in train.")
+    if original_col not in test.columns:
+        raise KeyError(f"Column '{original_col}' not found in test.")
+    if encoded_col not in test.columns:
+        raise KeyError(f"Column '{encoded_col}' not found in test.")
+    if target not in train.columns:
+        raise KeyError(f"Target column '{target}' not found in train.")
+
+    # グループ数とサンプル数の集計
+    group_counts = train.groupby(original_col, dropna=False).size()
+    groups = len(group_counts)
+    small_groups = int((group_counts < small_group_threshold).sum())
+
+    # エンコード値の平均 vs target の平均(リーク疑い検出)
+    oof_mean = float(train[encoded_col].mean())
+    global_mean = float(train[target].mean())
+
+    # test の未知カテゴリ数
+    train_categories = set(train[original_col].unique())
+    test_unknown_mask = ~test[original_col].isin(train_categories)
+    test_unknown_count = int(test_unknown_mask.sum())
+    test_total = len(test)
+    test_coverage = 1.0 - (test_unknown_count / test_total) if test_total > 0 else 1.0
+
+    return {
+        'encoded_col': encoded_col,
+        'groups': groups,
+        'small_groups': small_groups,
+        'small_group_threshold': small_group_threshold,
+        'oof_mean': oof_mean,
+        'global_mean': global_mean,
+        'test_unknown_count': test_unknown_count,
+        'test_total': test_total,
+        'test_coverage': test_coverage,
+    }
