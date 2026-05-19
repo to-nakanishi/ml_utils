@@ -2,7 +2,10 @@
 import pytest
 import numpy as np
 import pandas as pd
-from ml_utils.feature_engineering.target_encoding import target_encode_oof
+from ml_utils.feature_engineering.target_encoding import (
+    target_encode_oof,
+    diagnose_target_encoding,
+)
 
 
 # ===== 基本動作テスト =====
@@ -121,3 +124,56 @@ def test_smoothing_pulls_toward_global_mean():
     dist_small = np.abs(test_enc_small['CAT_TARGET_RATE'].values - global_mean).mean()
     dist_large = np.abs(test_enc_large['CAT_TARGET_RATE'].values - global_mean).mean()
     assert dist_large < dist_small
+
+
+# ===== 診断関数テスト =====
+def test_diagnose_basic_output():
+    """diagnose_target_encoding は所定のキーを持つ dict を返す."""
+    train = pd.DataFrame({'CAT': ['A', 'B'] * 50, 'TARGET': [1, 0] * 50})
+    test = pd.DataFrame({'CAT': ['A', 'B']})
+    train_enc, test_enc = target_encode_oof(train, test, 'CAT', verbose=False)
+    report = diagnose_target_encoding(train_enc, test_enc, 'CAT', 'CAT_TARGET_RATE')
+    expected_keys = {
+        'encoded_col', 'groups', 'small_groups', 'small_group_threshold',
+        'oof_mean', 'global_mean', 'test_unknown_count', 'test_total', 'test_coverage',
+    }
+    assert isinstance(report, dict)
+    assert set(report.keys()) == expected_keys
+
+
+def test_diagnose_small_groups_detected():
+    """サンプル数が閾値未満のグループ数を正しく検出する."""
+    # A: 50件、B: 50件、C: 3件、D: 2件 (C, D が small group)
+    train = pd.DataFrame({
+        'CAT': ['A'] * 50 + ['B'] * 50 + ['C'] * 3 + ['D'] * 2,
+        'TARGET': [1, 0] * 50 + [1] * 3 + [0] * 2,
+    })
+    test = pd.DataFrame({'CAT': ['A', 'B']})
+    train_enc, test_enc = target_encode_oof(train, test, 'CAT', verbose=False)
+    report = diagnose_target_encoding(
+        train_enc, test_enc, 'CAT', 'CAT_TARGET_RATE', small_group_threshold=10
+    )
+    assert report['groups'] == 4
+    assert report['small_groups'] == 2  # C と D
+
+
+def test_diagnose_oof_vs_global_close():
+    """リーク防止が機能していれば OOF mean ≈ global mean となる."""
+    train = pd.DataFrame({'CAT': ['A', 'B', 'C'] * 50, 'TARGET': [1, 0, 1] * 50})
+    test = pd.DataFrame({'CAT': ['A', 'B', 'C']})
+    train_enc, test_enc = target_encode_oof(train, test, 'CAT', verbose=False)
+    report = diagnose_target_encoding(train_enc, test_enc, 'CAT', 'CAT_TARGET_RATE')
+    # OOF + smoothing が機能していれば、両者の差は十分小さい
+    assert abs(report['oof_mean'] - report['global_mean']) < 0.01
+
+
+def test_diagnose_test_coverage():
+    """test の未知カテゴリを正しくカウントし、coverage を算出する."""
+    train = pd.DataFrame({'CAT': ['A', 'B'] * 50, 'TARGET': [1, 0] * 50})
+    # test 10件中、UNKNOWN が 2件 → coverage = 0.8
+    test = pd.DataFrame({'CAT': ['A'] * 4 + ['B'] * 4 + ['UNKNOWN'] * 2})
+    train_enc, test_enc = target_encode_oof(train, test, 'CAT', verbose=False)
+    report = diagnose_target_encoding(train_enc, test_enc, 'CAT', 'CAT_TARGET_RATE')
+    assert report['test_unknown_count'] == 2
+    assert report['test_total'] == 10
+    assert np.isclose(report['test_coverage'], 0.8)
