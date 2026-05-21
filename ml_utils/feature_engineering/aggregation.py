@@ -1,4 +1,5 @@
 """Aggregate a child table to one row per group key for baseline features."""
+
 import pandas as pd
 
 
@@ -18,7 +19,7 @@ def aggregate_table(
 
     生成する集約は4種:
       - 数値列: min / max / mean / sum / std
-      - カテゴリ列: nunique(ユニーク数)
+      - カテゴリ列(数値以外): nunique(ユニーク数)
       - 直近値: sort_col が最大の行の各列値(`_latest`)
       - sort_col 自体: min / max / count
         (sort_col は数値集約から除外し、ここで別途集約する。時間軸の列を想定し、
@@ -28,6 +29,10 @@ def aggregate_table(
     列名は必ず prefix を付けてフラット化する(`{prefix}{列}_{統計}`)。複数の
     子テーブルを集約すると列名が衝突しうるため、prefix は必須引数とした
     (テーブルごとに 'BUREAU_' のように一意な接頭辞を渡すこと)。
+
+    数値列は select_dtypes(include='number')、カテゴリ列は select_dtypes(
+    exclude='number')で判定する。downcast や object→category 変換などの前処理を
+    通した後でも、型の状態に依存せず「数値か / それ以外か」で振り分けられる。
 
     本関数は集約済み DataFrame を返すのみで、application 等への結合(merge)は
     行わない。結合キー名はテーブルにより異なり、結合方法は前処理側の責務である
@@ -73,8 +78,9 @@ def aggregate_table(
         raise ValueError("df is empty.")
 
     exclude = [group_key, sort_col]
-    num_cols = [c for c in df.select_dtypes('number').columns if c not in exclude]
-    cat_cols = [c for c in df.select_dtypes(['object', 'category']).columns if c not in exclude]
+    num_cols = [c for c in df.select_dtypes(include='number').columns if c not in exclude]
+    # 数値以外をカテゴリ扱い(object / category / string などを漏れなく対象にする)
+    cat_cols = [c for c in df.select_dtypes(exclude='number').columns if c not in exclude]
 
     # --- 数値型集約 ---
     num_agg = df.groupby(group_key)[num_cols].agg(['min', 'max', 'mean', 'sum', 'std'])
