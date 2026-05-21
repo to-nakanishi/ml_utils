@@ -23,6 +23,7 @@ ml_utils/
 │       ├── composite.py       # 平均系の合成特徴量
 │       └── imputation.py      # デフォルト率ベースの欠損補完
 │       └── density.py         # TARGET別密度の交点(リスク反転境界)算出
+│       └── aggregation.py     # サブテーブルの group_key 単位一括集約
 ├── tests/                     # pytest テストコード
 │   └── feature_engineering/
 │       ├── test_memory.py
@@ -30,6 +31,7 @@ ml_utils/
 │       ├── test_composite.py
 │       └── test_imputation.py
 │       └── test_density.py
+│       └── test_aggregation.py    # ← 追加
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
@@ -45,6 +47,7 @@ ml_utils/
 │   │   ├── target_encoding.py # 実装済み
 │   │   ├── composite.py       # 実装済み
 │   │   ├── imputation.py      # 実装済み
+～～～～～～～～～～～～～～～～～# 随時追加
 │   ├── validation/            # CV戦略
 │   └── modeling/              # モデル学習ラッパー
 └── tests/
@@ -82,6 +85,14 @@ TARGET 別の密度分布から、リスクの向きが反転する境界(交点
 | Function | Description |
 |----------|-------------|
 | `find_density_crossover` | TARGET=0/1 の KDE が交差するスコアを列ごとに算出し `{列名: 交点}` を返す。返した交点で `(df[col] < 交点)` の閾値フラグを生成できる |
+
+### `feature_engineering.aggregation`
+子テーブル(1対多)を group_key 単位で1行に集約。
+
+| Function | Description |
+|----------|-------------|
+| `aggregate_table` | bureau等の子テーブルを group_key 単位で集約(数値: min/max/mean/sum/std、カテゴリ: nunique、直近値、レコード数)。試走用の一括集約 |
+
 
 (以下、関数を追加するたびに更新)
 

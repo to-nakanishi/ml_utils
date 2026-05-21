@@ -5,6 +5,7 @@ from .imputation import impute_by_target_rate
 from .memory import downcast_numeric
 from .target_encoding import target_encode_oof, diagnose_target_encoding
 from .density import find_density_crossover
+from .aggregation import aggregate_table
 
 __all__ = [
     'make_composite_features',
@@ -13,4 +14,5 @@ __all__ = [
     'target_encode_oof',
     'diagnose_target_encoding',
     'find_density_crossover'
+    'aggregate_table'
 ]
