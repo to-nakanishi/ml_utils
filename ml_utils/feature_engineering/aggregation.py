@@ -13,7 +13,7 @@ def aggregate_table(
     ----------
     summary
     ----------
-    子テーブル(1対多)を group_key 単位で1行に集約する関数。Home Credit の
+    サブテーブル(1対多)を group_key 単位で1行に集約する関数。Home Credit の
     bureau / previous_application などの子テーブルを SK_ID_CURR 単位に畳み込む、
     試走(ベースライン)用の一括集約を想定する。
 
@@ -27,7 +27,7 @@ def aggregate_table(
          時間軸に対して sum/std は意味が薄いため取らない)
 
     列名は必ず prefix を付けてフラット化する(`{prefix}{列}_{統計}`)。複数の
-    子テーブルを集約すると列名が衝突しうるため、prefix は必須引数とした
+    サブテーブルを集約すると列名が衝突しうるため、prefix は必須引数とした
     (テーブルごとに 'BUREAU_' のように一意な接頭辞を渡すこと)。
 
     数値列は select_dtypes(include='number')、カテゴリ列は select_dtypes(
@@ -46,7 +46,7 @@ def aggregate_table(
     Parameters
     ----------
     df : pd.DataFrame
-        集約対象の子テーブル。`group_key` と `sort_col` を含む。
+        集約対象のサブテーブル。`group_key` と `sort_col` を含む。
     group_key : str
         集約のキー列(例: 'SK_ID_CURR')。
     sort_col : str
