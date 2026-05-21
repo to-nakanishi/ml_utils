@@ -22,12 +22,14 @@ ml_utils/
 │       ├── target_encoding.py # OOF + Smoothing Target Encoding
 │       ├── composite.py       # 平均系の合成特徴量
 │       └── imputation.py      # デフォルト率ベースの欠損補完
+│       └── density.py         # TARGET別密度の交点(リスク反転境界)算出
 ├── tests/                     # pytest テストコード
 │   └── feature_engineering/
 │       ├── test_memory.py
 │       ├── test_target_encoding.py
 │       ├── test_composite.py
 │       └── test_imputation.py
+│       └── test_density.py
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
@@ -43,7 +45,6 @@ ml_utils/
 │   │   ├── target_encoding.py # 実装済み
 │   │   ├── composite.py       # 実装済み
 │   │   ├── imputation.py      # 実装済み
-│   │   └── flags.py           # 境界値・ラウンド値フラグ
 │   ├── validation/            # CV戦略
 │   └── modeling/              # モデル学習ラッパー
 └── tests/
@@ -75,6 +76,12 @@ DataFrameのメモリ使用量を削減するダウンキャスト関数。
 | Function | Description |
 |----------|-------------|
 | `impute_by_target_rate` | 欠損をデフォルト率が近いビンの代表値で補完(欠損フラグ列も任意で追加) |
+
+### `feature_engineering.density`
+TARGET 別の密度分布から、リスクの向きが反転する境界(交点)を算出。
+| Function | Description |
+|----------|-------------|
+| `find_density_crossover` | TARGET=0/1 の KDE が交差するスコアを列ごとに算出し `{列名: 交点}` を返す。返した交点で `(df[col] < 交点)` の閾値フラグを生成できる |
 
 (以下、関数を追加するたびに更新)
 
