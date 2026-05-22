@@ -88,10 +88,10 @@ TARGET 別の密度分布から、リスクの向きが反転する境界(交点
 
 ### `feature_engineering.aggregation`
 サブテーブル(1対多)を group_key 単位で1行に集約。
-
 | Function | Description |
 |----------|-------------|
 | `aggregate_table` | bureau等のサブテーブルを group_key 単位で集約(数値: min/max/mean/sum/std、カテゴリ: nunique、直近値、レコード数)。試走用の一括集約 |
+| `diagnose_aggregation` | 集約前にキーの素性を診断。repeat_rate(1対多の度合い)、欠損数、直近値が一意か等を dict で返す |
 
 
 (以下、関数を追加するたびに更新)
