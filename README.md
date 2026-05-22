@@ -87,11 +87,11 @@ TARGET 別の密度分布から、リスクの向きが反転する境界(交点
 | `find_density_crossover` | TARGET=0/1 の KDE が交差するスコアを列ごとに算出し `{列名: 交点}` を返す。返した交点で `(df[col] < 交点)` の閾値フラグを生成できる |
 
 ### `feature_engineering.aggregation`
-子テーブル(1対多)を group_key 単位で1行に集約。
+サブテーブル(1対多)を group_key 単位で1行に集約。
 
 | Function | Description |
 |----------|-------------|
-| `aggregate_table` | bureau等の子テーブルを group_key 単位で集約(数値: min/max/mean/sum/std、カテゴリ: nunique、直近値、レコード数)。試走用の一括集約 |
+| `aggregate_table` | bureau等のサブテーブルを group_key 単位で集約(数値: min/max/mean/sum/std、カテゴリ: nunique、直近値、レコード数)。試走用の一括集約 |
 
 
 (以下、関数を追加するたびに更新)
