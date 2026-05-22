@@ -105,3 +105,84 @@ def aggregate_table(
     # --- 結合 ---
     result = num_agg.join(cat_agg).join(latest).join(sort_agg).reset_index()
     return result
+
+
+def diagnose_aggregation(
+    df: pd.DataFrame,
+    group_key: str,
+    sort_col: str,
+) -> dict:
+    """
+    ----------
+    summary
+    ----------
+    aggregate_table で集約する前に、メインキー(group_key)とソート列(sort_col)
+    の素性を診断する関数。集約が必要か・集約に問題がないかを事前に確認する。
+    結果を dict で返す(判断は呼び出し側)。
+
+    診断項目:
+      - total_rows / unique_keys / repeat_rate:
+          総行数・ユニークキー数・繰り返し率(= total / unique)。
+          repeat_rate が 1.0 なら1対1(集約不要)、>1.0 なら1対多(集約が必要)。
+      - is_one_to_one:
+          repeat_rate == 1.0 か。True なら集約不要のサイン。
+      - group_key_n_missing:
+          group_key の欠損数。>0 だと aggregate_table が ValueError を投げる。
+      - sort_col_n_missing:
+          sort_col の欠損数。>0 だと sort_values で順序が乱れ、直近値が不正になる。
+      - tied_latest_keys:
+          group_key 内で sort_col の最大値が複数行ある(=直近値が一意に決まらない)
+          group_key の数。>0 だと aggregate_table の `_latest` がどの行を拾うか不定。
+
+    ----------
+    Parameters
+    ----------
+    df : pd.DataFrame
+        診断対象のサブテーブル。`group_key` と `sort_col` を含む。
+    group_key : str
+        集約のキー列(例: 'SK_ID_CURR')。
+    sort_col : str
+        直近値の判定に使う列(例: 'DAYS_CREDIT')。
+
+    ----------
+    Returns
+    ----------
+    dict
+        診断結果。total_rows / unique_keys / repeat_rate / is_one_to_one /
+        group_key_n_missing / sort_col_n_missing / tied_latest_keys を含む。
+
+    ----------
+    Examples
+    ----------
+    >>> info = diagnose_aggregation(bureau, 'SK_ID_CURR', 'DAYS_CREDIT')
+    >>> info['repeat_rate']
+    5.62
+    >>> info['is_one_to_one']
+    False
+    """
+    if group_key not in df.columns:
+        raise KeyError(f"group_key '{group_key}' not found in df.")
+    if sort_col not in df.columns:
+        raise KeyError(f"sort_col '{sort_col}' not found in df.")
+    if len(df) == 0:
+        raise ValueError("df is empty.")
+
+    total_rows = len(df)
+    unique_keys = df[group_key].nunique()
+    repeat_rate = total_rows / unique_keys if unique_keys > 0 else float('nan')
+
+    # group_key 内で sort_col 最大値が複数行 = 直近値が一意に決まらない
+    max_per_key = df.groupby(group_key)[sort_col].transform('max')
+    is_at_max = df[sort_col] == max_per_key
+    ties_per_key = df[is_at_max].groupby(group_key).size()
+    tied_latest_keys = int((ties_per_key > 1).sum())
+
+    return {
+        'total_rows': total_rows,
+        'unique_keys': int(unique_keys),
+        'repeat_rate': round(repeat_rate, 2),
+        'is_one_to_one': repeat_rate == 1.0,
+        'group_key_n_missing': int(df[group_key].isna().sum()),
+        'sort_col_n_missing': int(df[sort_col].isna().sum()),
+        'tied_latest_keys': tied_latest_keys,
+    }

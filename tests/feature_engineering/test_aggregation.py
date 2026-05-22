@@ -2,7 +2,7 @@
 import pytest
 import numpy as np
 import pandas as pd
-from ml_utils.feature_engineering.aggregation import aggregate_table
+from ml_utils.feature_engineering.aggregation import aggregate_table, diagnose_aggregation
 
 
 def _make_child(seed=42):
@@ -119,3 +119,71 @@ def test_error_on_empty_df():
     df = _make_child().iloc[0:0]
     with pytest.raises(ValueError):
         aggregate_table(df, 'SK_ID_CURR', 'DAYS_CREDIT', 'X_')
+
+
+# ===== diagnose_aggregation テスト =====
+def test_diagnose_returns_dict():
+    """戻り値は dict."""
+    df = _make_child()
+    assert isinstance(diagnose_aggregation(df, 'SK_ID_CURR', 'DAYS_CREDIT'), dict)
+
+
+def test_diagnose_one_to_many():
+    """1対多: total/unique/repeat_rate が正しく、is_one_to_one が False."""
+    df = _make_child()
+    info = diagnose_aggregation(df, 'SK_ID_CURR', 'DAYS_CREDIT')
+    assert info['total_rows'] == 8
+    assert info['unique_keys'] == 3
+    assert info['repeat_rate'] == round(8 / 3, 2)
+    assert info['is_one_to_one'] is False
+
+
+def test_diagnose_one_to_one():
+    """1対1: repeat_rate が 1.0、is_one_to_one が True(集約不要のサイン)."""
+    df = pd.DataFrame({'SK_ID_CURR': [1, 2, 3], 'DAYS_CREDIT': [-1, -2, -3]})
+    info = diagnose_aggregation(df, 'SK_ID_CURR', 'DAYS_CREDIT')
+    assert info['repeat_rate'] == 1.0
+    assert info['is_one_to_one'] is True
+
+
+def test_diagnose_tied_latest():
+    """group_key 内で sort_col 最大値が複数の場合、tied_latest_keys が数える."""
+    # 101 は DAYS_CREDIT 最大(-500)が2行 → tie。102 は一意。
+    df = pd.DataFrame({
+        'SK_ID_CURR': [101, 101, 101, 102, 102],
+        'DAYS_CREDIT': [-500, -500, -900, -300, -800],
+    })
+    info = diagnose_aggregation(df, 'SK_ID_CURR', 'DAYS_CREDIT')
+    assert info['tied_latest_keys'] == 1
+
+
+def test_diagnose_counts_missing():
+    """group_key / sort_col の欠損数をそれぞれ正しく数える."""
+    df = pd.DataFrame({
+        'SK_ID_CURR': [101.0, 101.0, np.nan, 102.0],
+        'DAYS_CREDIT': [-500.0, -900.0, np.nan, np.nan],
+    })
+    info = diagnose_aggregation(df, 'SK_ID_CURR', 'DAYS_CREDIT')
+    assert info['group_key_n_missing'] == 1
+    assert info['sort_col_n_missing'] == 2
+
+
+def test_diagnose_error_on_missing_group_key():
+    """group_key 列が存在しない場合、KeyError を投げる."""
+    df = _make_child()
+    with pytest.raises(KeyError):
+        diagnose_aggregation(df, 'NOT_EXIST', 'DAYS_CREDIT')
+
+
+def test_diagnose_error_on_missing_sort_col():
+    """sort_col 列が存在しない場合、KeyError を投げる."""
+    df = _make_child()
+    with pytest.raises(KeyError):
+        diagnose_aggregation(df, 'SK_ID_CURR', 'NOT_EXIST')
+
+
+def test_diagnose_error_on_empty_df():
+    """空の DataFrame の場合、ValueError を投げる."""
+    df = _make_child().iloc[0:0]
+    with pytest.raises(ValueError):
+        diagnose_aggregation(df, 'SK_ID_CURR', 'DAYS_CREDIT')
