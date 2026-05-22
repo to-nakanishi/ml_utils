@@ -6,7 +6,7 @@ from ml_utils.feature_engineering.aggregation import aggregate_table
 
 
 def _make_child(seed=42):
-    """親子テーブル(bureau風)を生成。SK 101=3件, 102=3件, 103=2件 の計8行."""
+    """メイン/サブテーブル(bureau風)を生成。SK 101=3件, 102=3件, 103=2件 の計8行."""
     return pd.DataFrame({
         'SK_ID_CURR': [101, 101, 101, 102, 102, 102, 103, 103],
         'DAYS_CREDIT': [-541, -905, -1879, -1913, -313, -1231, -1615, -816],
