@@ -14,7 +14,7 @@ def aggregate_table(
     summary
     ----------
     サブテーブル(1対多)を group_key 単位で1行に集約する関数。Home Credit の
-    bureau / previous_application などの子テーブルを SK_ID_CURR 単位に畳み込む、
+    bureau / previous_application などのサブテーブルを SK_ID_CURR 単位に畳み込む、
     試走(ベースライン)用の一括集約を想定する。
 
     生成する集約は4種:
