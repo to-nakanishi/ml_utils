@@ -11,27 +11,54 @@ cd ml_utils
 pip install -e .
 ```
 
+modeling モジュール(`run_baseline` など)を使う場合は、LightGBM / CatBoost を含めてインストール:
+
+```bash
+pip install -e ".[modeling]"
+```
+
+## Development
+
+### Setup
+
+```bash
+git clone https://github.com/to-nakanishi/ml_utils.git
+cd ml_utils
+pip install -e ".[dev,modeling]"
+```
+
+### Run tests
+
+```bash
+pytest tests/ -v
+```
+
 ## Structure
 
 ### Current
+
 ```
 ml_utils/
-├── ml_utils/                  # パッケージ本体
-│   └── feature_engineering/
-│       ├── memory.py          # メモリ最適化(ダウンキャスト)
-│       ├── target_encoding.py # OOF + Smoothing Target Encoding
-│       ├── composite.py       # 平均系の合成特徴量
-│       └── imputation.py      # デフォルト率ベースの欠損補完
-│       └── density.py         # TARGET別密度の交点(リスク反転境界)算出
-│       └── aggregation.py     # サブテーブルの group_key 単位一括集約
-├── tests/                     # pytest テストコード
-│   └── feature_engineering/
-│       ├── test_memory.py
-│       ├── test_target_encoding.py
-│       ├── test_composite.py
-│       └── test_imputation.py
-│       └── test_density.py
-│       └── test_aggregation.py    # ← 追加
+├── ml_utils/                      # パッケージ本体
+│   ├── feature_engineering/
+│   │   ├── memory.py              # メモリ最適化(ダウンキャスト)
+│   │   ├── target_encoding.py     # OOF + Smoothing Target Encoding
+│   │   ├── composite.py           # 平均系の合成特徴量
+│   │   ├── imputation.py          # デフォルト率ベースの欠損補完
+│   │   ├── density.py             # TARGET別密度の交点(リスク反転境界)算出
+│   │   └── aggregation.py         # サブテーブルの group_key 単位一括集約
+│   └── modeling/
+│       └── baseline.py            # LGBM/CatBoost ベースライン試走
+├── tests/                         # pytest テストコード
+│   ├── feature_engineering/
+│   │   ├── test_memory.py
+│   │   ├── test_target_encoding.py
+│   │   ├── test_composite.py
+│   │   ├── test_imputation.py
+│   │   ├── test_density.py
+│   │   └── test_aggregation.py
+│   └── modeling/
+│       └── test_baseline.py
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
@@ -42,17 +69,13 @@ ml_utils/
 ```
 ml_utils/
 ├── ml_utils/
-│   ├── feature_engineering/
-│   │   ├── memory.py          # 実装済み
-│   │   ├── target_encoding.py # 実装済み
-│   │   ├── composite.py       # 実装済み
-│   │   ├── imputation.py      # 実装済み
-～～～～～～～～～～～～～～～～～# 随時追加
-│   ├── validation/            # CV戦略
-│   └── modeling/              # モデル学習ラッパー
+│   ├── feature_engineering/       # 実装済み
+│   ├── modeling/                  # baseline 実装済み、学習ラッパー等を追加予定
+│   └── validation/                # CV戦略
 └── tests/
 └── (各モジュールに対応するテスト)
 ```
+
 ## Modules
 
 ### `feature_engineering.memory`
@@ -87,37 +110,27 @@ TARGET 別の密度分布から、リスクの向きが反転する境界(交点
 | `find_density_crossover` | TARGET=0/1 の KDE が交差するスコアを列ごとに算出し `{列名: 交点}` を返す。返した交点で `(df[col] < 交点)` の閾値フラグを生成できる |
 
 ### `feature_engineering.aggregation`
-サブテーブル(1対多)を group_key 単位で1行に集約。
+サブテーブル(1対多)を group_key 単位で1行に集約 / 集約前の診断。
 | Function | Description |
 |----------|-------------|
 | `aggregate_table` | bureau等のサブテーブルを group_key 単位で集約(数値: min/max/mean/sum/std、カテゴリ: nunique、直近値、レコード数)。試走用の一括集約 |
 | `diagnose_aggregation` | 集約前にキーの素性を診断。repeat_rate(1対多の度合い)、欠損数、直近値が一意か等を dict で返す |
 
+### `modeling.baseline`
+LightGBM / CatBoost によるベースライン試走。
+| Function | Description |
+|----------|-------------|
+| `run_baseline` | SKF の OOF AUC と5fold平均の特徴量重要度を算出し、両モデルの比較表を返す。クリーニング後・FE後の節目で性能を確認する2値分類用の試走。SHAP用に全データ学習モデルも返す |
 
 (以下、関数を追加するたびに更新)
-
-## Development
-
-### Setup
-
-```bash
-git clone https://github.com/to-nakanishi/ml_utils.git
-cd ml_utils
-pip install -e ".[dev]"
-```
-
-### Run tests
-
-```bash
-pytest tests/ -v
-```
-
 
 ## Requirements
 
 - Python >= 3.10
 - pandas >= 2.0
 - numpy >= 1.24
+- scikit-learn >= 1.3
+- lightgbm >= 4.0 / catboost >= 1.2 (modeling のみ)
 
 ## License
 
