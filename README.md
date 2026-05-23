@@ -1,7 +1,7 @@
 # ml_utils
 
 Kaggleコンペや与信モデリングで再利用可能なPython関数群。
-[Home Credit Default Risk](https://github.com/to-nakanishi/home_credit_default_risk) プロジェクトで実際に使用した関数を切り出し、汎用化しています。
+[Home Credit Default Risk](https://github.com/to-nakanishi/home_credit_default_risk) をはじめとするポートフォリオで実際に使用した処理を、再利用可能な形にリファクタリングし、テスト付きで汎用化しています。
 
 ## Installation
 
