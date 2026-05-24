@@ -145,6 +145,7 @@ def run_baseline(
     if 'lgb' in models:
         oof = np.zeros(len(X))
         imp_acc = np.zeros(X.shape[1])
+        n_folds = 0
         for tr_idx, va_idx in splitter.split(X, y):
             model = lgb.LGBMClassifier(**lgb_p)
             model.fit(
@@ -155,8 +156,9 @@ def run_baseline(
             )
             oof[va_idx] = model.predict_proba(X.iloc[va_idx])[:, 1]
             imp_acc += model.feature_importances_
+            n_folds += 1
         result['lgb_auc'] = roc_auc_score(y, oof)
-        imp_mean = imp_acc / splitter.get_n_splits()
+        imp_mean = imp_acc / n_folds
         result['lgb_importance'] = pd.DataFrame({
             'feature': X.columns,
             'LGBM_pct': 100 * imp_mean / imp_mean.sum(),
@@ -170,6 +172,7 @@ def run_baseline(
     if 'cat' in models:
         oof = np.zeros(len(X))
         imp_acc = np.zeros(X_cat.shape[1])
+        n_folds = 0
         for tr_idx, va_idx in splitter.split(X_cat, y):
             model = cb.CatBoostClassifier(cat_features=cat_features, **cat_p)
             model.fit(
@@ -179,8 +182,9 @@ def run_baseline(
             )
             oof[va_idx] = model.predict_proba(X_cat.iloc[va_idx])[:, 1]
             imp_acc += model.get_feature_importance()
+            n_folds += 1
         result['cat_auc'] = roc_auc_score(y, oof)
-        imp_mean = imp_acc / splitter.get_n_splits()
+        imp_mean = imp_acc / n_folds
         result['cat_importance'] = pd.DataFrame({
             'feature': X_cat.columns,
             'CAT_pct': 100 * imp_mean / imp_mean.sum(),
