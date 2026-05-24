@@ -158,7 +158,7 @@ def run_baseline(
             imp_acc += model.feature_importances_
             n_folds += 1
         result['lgb_auc'] = roc_auc_score(y, oof)
-        imp_mean = imp_acc / splitter.get_n_splits()
+        imp_mean = imp_acc / n_folds
         result['lgb_importance'] = pd.DataFrame({
             'feature': X.columns,
             'LGBM_pct': 100 * imp_mean / imp_mean.sum(),
@@ -184,7 +184,7 @@ def run_baseline(
             imp_acc += model.get_feature_importance()
             n_folds += 1
         result['cat_auc'] = roc_auc_score(y, oof)
-        imp_mean = imp_acc / splitter.get_n_splits()
+        imp_mean = imp_acc / n_folds
         result['cat_importance'] = pd.DataFrame({
             'feature': X_cat.columns,
             'CAT_pct': 100 * imp_mean / imp_mean.sum(),
