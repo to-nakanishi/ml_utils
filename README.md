@@ -47,8 +47,10 @@ ml_utils/
 │   │   ├── imputation.py          # デフォルト率ベースの欠損補完
 │   │   ├── density.py             # TARGET別密度の交点(リスク反転境界)算出
 │   │   └── aggregation.py         # サブテーブルの group_key 単位一括集約
-│   └── modeling/
-│       └── baseline.py            # LGBM/CatBoost ベースライン試走
+│   ├── modeling/
+│   │   └── baseline.py            # LGBM/CatBoost ベースライン試走
+│   └── validation/                
+│       └── splitters.py           # 時系列CV(スライド窓/拡大窓)
 ├── tests/                         # pytest テストコード
 │   ├── feature_engineering/
 │   │   ├── test_memory.py
@@ -57,8 +59,10 @@ ml_utils/
 │   │   ├── test_imputation.py
 │   │   ├── test_density.py
 │   │   └── test_aggregation.py
-│   └── modeling/
-│       └── test_baseline.py
+│   ├── modeling/
+│   │   └── test_baseline.py
+│   └── validation/             
+│       └── test_splitters.py
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
@@ -69,9 +73,9 @@ ml_utils/
 ```
 ml_utils/
 ├── ml_utils/
-│   ├── feature_engineering/       # 実装済み
+│   ├── feature_engineering/       
 │   ├── modeling/                  # baseline 実装済み、学習ラッパー等を追加予定
-│   └── validation/                # CV戦略
+│   └── validation/              
 └── tests/
 └── (各モジュールに対応するテスト)
 ```
@@ -121,6 +125,12 @@ LightGBM / CatBoost によるベースライン試走。
 | Function | Description |
 |----------|-------------|
 | `run_baseline` | SKF の OOF AUC と5fold平均の特徴量重要度を算出し、両モデルの比較表を返す。クリーニング後・FE後の節目で性能を確認する2値分類用の試走。SHAP用に全データ学習モデルも返す |
+
+### `validation.splitters`
+時系列クロスバリデーション。
+| Function | Description |
+|----------|-------------|
+| `SlidingWindowSplit` | 「直近N期間で学習→次の1期間を検証」を時間順にスライドする時系列CV。sklearn互換で run_baseline の cv に渡せる。expanding でスライド窓/拡大窓を切替。IEEEのような時系列リークを防ぐ |
 
 (以下、関数を追加するたびに更新)
 
