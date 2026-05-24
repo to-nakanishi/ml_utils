@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import TimeSeriesSplit
 from ml_utils.modeling.baseline import run_baseline
-
+from ml_utils.validation.splitters import SlidingWindowSplit
 
 def _make_xy(n=800, seed=42):
     """signal が target を作る人工データ + ノイズ + カテゴリ列(欠損あり)."""
@@ -134,3 +134,21 @@ def test_error_on_invalid_model_name():
     X, y = _make_xy()
     with pytest.raises(ValueError):
         run_baseline(X, y, models=('xgb',))
+
+
+def test_baseline_with_x_dependent_cv():
+    """X 必須の CV(SlidingWindowSplit)でも動く(get_n_splits 非依存の回帰)."""
+    rng = np.random.RandomState(42)
+    rows = []
+    for m in range(6):
+        for _ in range(150):
+            sig = rng.normal(0, 1)
+            rows.append({'time_month': m, 'signal': sig,
+                         'y': int(sig + rng.normal(0, 1) > 0)})
+    df = pd.DataFrame(rows)
+    y = df['y']
+    X = df.drop(columns=['y'])
+    tscv = SlidingWindowSplit('time_month', train_window=2)
+    res = run_baseline(X, y, models=('lgb',), cv=tscv, return_models=False)
+    assert res['lgb_auc'] is not None
+    assert 0.0 < res['lgb_auc'] <= 1.0
