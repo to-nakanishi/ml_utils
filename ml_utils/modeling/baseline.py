@@ -2,9 +2,8 @@
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
-
+from sklearn.model_selection import StratifiedKFold
 
 _DEFAULT_LGB = {
     'objective': 'binary',
@@ -103,9 +102,9 @@ def run_baseline(
     (0.7785, 0.7821)
     >>> res['comparison'].head()
     """
-    import lightgbm as lgb
     import catboost as cb
-
+    import lightgbm as lgb
+    
     if len(X) != len(y):
         raise ValueError(f"X and y length mismatch: {len(X)} vs {len(y)}")
     if len(X) == 0:

@@ -1,7 +1,8 @@
 """impute_by_target_rate のテスト."""
-import pytest
 import numpy as np
 import pandas as pd
+import pytest
+
 from ml_utils.feature_engineering.imputation import impute_by_target_rate
 
 

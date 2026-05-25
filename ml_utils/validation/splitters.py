@@ -1,7 +1,5 @@
 """Time-series cross-validation splitters."""
-
 import numpy as np
-import pandas as pd
 
 
 class SlidingWindowSplit:
