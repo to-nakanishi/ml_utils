@@ -4,8 +4,8 @@ import pandas as pd
 import pytest
 
 from ml_utils.feature_engineering.target_encoding import (
-    target_encode_oof,
     diagnose_target_encoding,
+    target_encode_oof,
 )
 
 
