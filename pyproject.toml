@@ -30,3 +30,9 @@ modeling = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["ml_utils*"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
