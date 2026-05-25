@@ -7,6 +7,7 @@ from sklearn.model_selection import TimeSeriesSplit
 from ml_utils.modeling.baseline import run_baseline
 from ml_utils.validation.splitters import SlidingWindowSplit
 
+
 def _make_xy(n=800, seed=42):
     """signal が target を作る人工データ + ノイズ + カテゴリ列(欠損あり)."""
     rng = np.random.RandomState(seed)
