@@ -72,7 +72,7 @@ def test_object_columns_untouched():
     """文字列列はダウンキャストの対象外."""
     df = pd.DataFrame({'a': [1, 2, 3], 'b': ['x', 'y', 'z']})
     result = downcast_numeric(df, verbose=False)
-    assert result['b'].dtype == object
+    assert not pd.api.types.is_numeric_dtype(result['b'])
 
 
 def test_returns_same_object():
