@@ -1,6 +1,6 @@
 """Time-series cross-validation splitters."""
-
 import numpy as np
+
 
 class SlidingWindowSplit:
     """
