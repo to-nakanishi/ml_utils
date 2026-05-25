@@ -4,7 +4,6 @@ import pandas as pd
 
 from ml_utils.feature_engineering.memory import downcast_numeric
 
-
 # ===== 基本動作テスト =====
 
 def test_downcast_int_to_int8():
