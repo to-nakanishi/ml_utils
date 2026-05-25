@@ -1,10 +1,10 @@
 """run_baseline のテスト."""
-import pytest
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import TimeSeriesSplit
+import pytest
 from ml_utils.modeling.baseline import run_baseline
 from ml_utils.validation.splitters import SlidingWindowSplit
+from sklearn.model_selection import TimeSeriesSplit
 
 def _make_xy(n=800, seed=42):
     """signal が target を作る人工データ + ノイズ + カテゴリ列(欠損あり)."""
