@@ -1,6 +1,6 @@
 # ml_utils
 
-![CI](https://github.com/to-nakanishi/ml_utils/actions/workflows/ci.yml/badge.svg)
+![CI status](https://github.com/to-nakanishi/ml_utils/actions/workflows/ci.yml/badge.svg)
 
 Kaggleコンペや与信モデリングで再利用可能なPython関数群。
 [Home Credit Default Risk](https://github.com/to-nakanishi/home_credit_default_risk) をはじめとするポートフォリオで実際に使用した処理を、再利用可能な形にリファクタリングし、テスト付きで汎用化しています。
