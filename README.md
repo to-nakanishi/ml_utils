@@ -96,6 +96,7 @@ DataFrameのメモリ使用量を削減するダウンキャスト関数。
 |----------|-------------|
 | `target_encode_oof` | OOF + Smoothing でリーク防止しつつカテゴリを target 率にエンコード |
 | `diagnose_target_encoding` | エンコード結果の品質を診断(小グループ数、リーク疑い、test カバレッジ等を dict で返す) |
+| `bin_target_encode_oof` | 連続値をビン化して OOF + Smoothing で target 率にエンコード(target_encode_oof の数値版)。欠損は独立ビンとして欠損自体のデフォルト率でエンコード。bins は int(等幅)/ 明示境界の両対応 |
 
 ### `feature_engineering.composite`
 厳選した数値列から平均系の合成特徴量を生成。
