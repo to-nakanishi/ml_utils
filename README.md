@@ -139,7 +139,7 @@ LightGBM / CatBoost によるベースライン試走。
 
 ## Requirements
 
-- Python >= 3.10
+- Python >= 3.11
 - pandas >= 2.0
 - numpy >= 1.24
 - scikit-learn >= 1.3
