@@ -49,6 +49,7 @@ ml_utils/
 │   │   ├── imputation.py          # デフォルト率ベースの欠損補完
 │   │   ├── density.py             # TARGET別密度の交点(リスク反転境界)算出
 │   │   └── aggregation.py         # サブテーブルの group_key 単位一括集約
+│   │   └── temporal.py            # 経過秒からの時間特徴量(周期 sin/cos + 線形)
 │   ├── modeling/
 │   │   └── baseline.py            # LGBM/CatBoost ベースライン試走
 │   └── validation/                
@@ -61,6 +62,7 @@ ml_utils/
 │   │   ├── test_imputation.py
 │   │   ├── test_density.py
 │   │   └── test_aggregation.py
+│   │   └── test_temporal.py
 │   ├── modeling/
 │   │   └── test_baseline.py
 │   └── validation/             
@@ -134,6 +136,12 @@ LightGBM / CatBoost によるベースライン試走。
 | Function | Description |
 |----------|-------------|
 | `SlidingWindowSplit` | 「直近N期間で学習→次の1期間を検証」を時間順にスライドする時系列CV。sklearn互換で run_baseline の cv に渡せる。expanding でスライド窓/拡大窓を切替。IEEEのような時系列リークを防ぐ |
+
+### `feature_engineering.temporal`
+基準時刻からの経過秒を表す1列から、時間特徴量を生成。
+| Function | Description |
+|----------|-------------|
+| `add_time_features` | 経過秒列から時間特徴量を生成。cycles(周期秒)は sin/cos エンコード(時刻・曜日・月内位置など境界が連続する軸)、linear(単位秒)は origin からの経過量(経過日数・通算月など)。周期・単位・基準点はすべて呼び出し側が秒で指定し、暦やドメイン値は持たない |
 
 (以下、関数を追加するたびに更新)
 
