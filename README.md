@@ -52,6 +52,8 @@ ml_utils/
 │   │   └── temporal.py            # 経過秒からの時間特徴量(周期 sin/cos + 線形)
 │   ├── modeling/
 │   │   └── baseline.py            # LGBM/CatBoost ベースライン試走
+│   ├── evaluation/
+│   │   └── threshold.py           # 閾値最適化(metric 指定可・感度分析用グリッド返し)
 │   └── validation/                
 │       └── splitters.py           # 時系列CV(スライド窓/拡大窓)
 ├── tests/                         # pytest テストコード
@@ -65,6 +67,8 @@ ml_utils/
 │   │   └── test_temporal.py
 │   ├── modeling/
 │   │   └── test_baseline.py
+│   ├── evaluation/
+│   │   └── threshold.py 
 │   └── validation/             
 │       └── test_splitters.py
 ├── pyproject.toml
@@ -142,6 +146,12 @@ LightGBM / CatBoost によるベースライン試走。
 | Function | Description |
 |----------|-------------|
 | `add_time_features` | 経過秒列から時間特徴量を生成。cycles(周期秒)は sin/cos エンコード(時刻・曜日・月内位置など境界が連続する軸)、linear(単位秒)は origin からの経過量(経過日数・通算月など)。周期・単位・基準点はすべて呼び出し側が秒で指定し、暦やドメイン値は持たない |
+
+### `evaluation.threshold`
+2値分類の判定閾値の最適化。
+| Function | Description |
+|----------|-------------|
+| `optimize_threshold` | metric を最大化する閾値をグリッドサーチ。metric は (y_true, y_pred)→float の関数で差し替え可能(既定 macro-F1)。最適閾値・スコアに加え全候補のスコア列も返し、感度分析に使える |
 
 (以下、関数を追加するたびに更新)
 
